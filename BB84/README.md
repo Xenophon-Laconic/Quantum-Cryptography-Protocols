@@ -1,6 +1,6 @@
-first# BB84 Quantum Key Distribution
+# BB84 Quantum Key Distribution
 
-This repository implements the **BB84 quantum key distribution (QKD) protocol**, first in a simple in‑memory simulation (`bb84.ipynb`), and then extended to a **distributed, ZeroMQ‑based simulation** (`alice.py`, `bob.py`, `eve.py`) that models the quantum communication channel and a subsequent classical post‑processing channel.
+This repository implements the **BB84 quantum key distribution (QKD) protocol**, first in a simple in‑memory simulation (`bb84.ipynb`), and then extended to a **distributed, ZeroMQ‑based simulation** (`alice.py`, `bob.py`, `eve.py`) that models the quantum and classical channels and can be run on separate machines by configuring the zmq addresses.
 
 The security of BB84 relies fundamentally on the **no‑cloning theorem**: an unknown quantum state cannot be copied perfectly. Any attempt by an eavesdropper (Eve) to gain information about the qubits necessarily disturbs them, introducing detectable errors in the key that Alice and Bob can estimate during classical post‑processing.
 
@@ -57,7 +57,7 @@ This is implemented in `qubits.py` via `ZQubit`, `XQubit`, and `NQubitChain`.
 
 ### (2) Quantum transmission: Alice → Bob (with possible eavesdropping by Eve)
 
-Alice sends her qubits to Bob over a **quantum channel**. In a real system this would be single photons over an optical fiber or free space. Here, I simulate this using **ZeroMQ (zmq)** message passing:
+Alice sends her qubits to Bob over a **quantum channel**. In a real system this would be photons over an optical fiber or free space. Here, I simulate this using **ZeroMQ (zmq)** message passing:
 
 - Alice sends one batch message containing all `(bits, pols)` pairs.
 - Eve sits between Alice and Bob and can optionally perform an **intercept‑resend attack**:
@@ -73,7 +73,7 @@ Measurement rules (implemented in `measurement.py`):
 - If the measurement basis matches the preparation basis → deterministic outcome (the encoded bit).
 - If the bases differ → outcome is random (50/50), and the qubit state is effectively changed.
 
-This reproduces the physics: **Eve’s measurement in the wrong basis introduces errors** that Alice and Bob can later detect. Because of the no‑cloning theorem, Eve cannot do better than this intercept‑resend strategy without introducing disturbances; she cannot copy the qubit perfectly and measure it later after learning the bases.
+This reproduces the physics: **Eve’s measurement in the wrong basis introduces errors** that Alice and Bob can later detect due to the no-cloning theorem.
 
 ---
 
@@ -86,7 +86,6 @@ bob_polars = random.choices(["Z", "X"], k=n)
 bob_bitstring = measure_nqubit_chain(qchain, bob_polars)
 ```
 
-In the zmq version, Bob reconstructs the qubit chain from the received batch and calls `measure_nqubit_chain` exactly as in the notebook.
 
 ---
 
@@ -151,8 +150,8 @@ BB84/
 
 - **`qubits.py`**  
   Defines:
-  - `ZQubit`: rectilinear (Z‑basis) qubit with values `"-"` and `"|"`.
-  - `XQubit`: diagonal (X‑basis) qubit with values `"/"` and `"\\"`.
+  - `ZQubit`: rectilinear (Z‑basis) qubit with values `"-"` and `"|"` corresponding to bits 0 and 1 respectively.
+  - `XQubit`: diagonal (X‑basis) qubit with values `"/"` and `"\\"` corresponding to bits 0 and 1 respectively.
   - `NQubitChain`: a sequence of qubits encoding a bit string in mixed bases.
 
 - **`measurement.py`**  
